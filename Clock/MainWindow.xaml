@@ -1,0 +1,51 @@
+﻿<Window x:Class="Clock.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Digital Clock" Height="600" Width="1200" Background="Transparent" AllowsTransparency="True" WindowStyle="None" MouseDown="Window_MouseDown" ContextMenuOpening="Window_ContextMenuOpening" MouseMove="Window_MouseMove">
+    <Window.ContextMenu>
+        <ContextMenu x:Name="contextMenu">
+            <MenuItem Header="Закрепить" Click="PinMenuItem_Click"/>
+            <MenuItem Header="Открепить" Click="UnpinMenuItem_Click"/>
+            <MenuItem Header="Закрыть" Click="CloseMenuItem_Click"/>
+            <MenuItem x:Name="topMostMenuItem" Header="Поверх всех окон" Click="TopMostMenuItem_Click"/>
+            <MenuItem x:Name="belowMenuItem" Header="Под окнами" Click="BelowMenuItem_Click"/>
+            <Separator/>
+            <MenuItem Header="Прозрачность">
+                <MenuItem>
+                    <Slider x:Name="OpacitySlider" Minimum="0" Maximum="100" Value="100" ValueChanged="OpacitySlider_ValueChanged" Width="150"/>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Размер шрифта">
+                <MenuItem>
+                    <Slider x:Name="FontSizeSlider" Minimum="24" Maximum="144" Value="48" ValueChanged="FontSizeSlider_ValueChanged" Width="150"/>
+                </MenuItem>
+            </MenuItem>
+            <MenuItem Header="Сбросить все" Click="ResetAll_Click"/>
+        </ContextMenu>
+    </Window.ContextMenu>
+
+    <Grid Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+            <Border Background="Black" CornerRadius="15" Padding="20" Margin="5">
+                <Label x:Name="HourLabel" FontSize="144" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+            </Border>
+            <Border Background="Black" CornerRadius="15" Padding="20" Margin="5">
+                <Label x:Name="MinuteLabel" FontSize="144" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+            </Border>
+            <Border Background="Black" CornerRadius="15" Padding="20" Margin="5">
+                <Label x:Name="SecondLabel" FontSize="144" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+            </Border>
+        </StackPanel>
+
+        <StackPanel HorizontalAlignment="Center" Grid.Row="1" Margin="10">
+            <Border Background="Black" CornerRadius="15" Padding="20">
+                <Label x:Name="DateLabel" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+            </Border>
+        </StackPanel>
+    </Grid>
+</Window>
