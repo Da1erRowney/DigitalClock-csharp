@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
+using Newtonsoft.Json;
 
 namespace Clock
 {
@@ -18,6 +19,7 @@ namespace Clock
         public MainWindow()
         {
             InitializeComponent();
+            LoadAppData(); // Загружаем данные при старте приложения
             StartClock();
             AddToStartup();
         }
@@ -78,9 +80,29 @@ namespace Clock
 
         private void CloseMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            SaveAppData();
             this.Close();
         }
-
+        private void SaveAppData()
+        {
+            var json = JsonConvert.SerializeObject(Apps);
+            System.IO.File.WriteAllText("appData.json", json);
+        }
+        private void LoadAppData()
+        {
+            if (System.IO.File.Exists("appData.json"))
+            {
+                var json = System.IO.File.ReadAllText("appData.json");
+                var appList = JsonConvert.DeserializeObject<ObservableCollection<AppInfo>>(json);
+                if (appList != null)
+                {
+                    Apps = appList;
+                    AppButtonsPanel.ItemsSource = Apps;
+                    AppLinksLabel.Visibility = Apps.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+                    AppLinksPanel.Visibility = AppLinksLabel.Visibility;
+                }
+            }
+        }
         private void TopMostMenuItem_Click(object sender, RoutedEventArgs e)
         {
             isTopMost = true;
@@ -156,6 +178,7 @@ namespace Clock
                 Apps.Add(new AppInfo { Name = appName, Url = appUrl });
                 AppButtonsPanel.ItemsSource = Apps; // Установка источника данных
                 AppLinksLabel.Visibility = Apps.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+                AppLinksPanel.Visibility = AppLinksLabel.Visibility;
             }
         }
         private void AppButton_Click(object sender, RoutedEventArgs e)
@@ -205,12 +228,24 @@ namespace Clock
                 }
             }
         }
+
+        private void ToggleButton_Checked(object sender, RoutedEventArgs e)
+        {
+            AppLinksPanel.Visibility = Visibility.Visible;
+        }
+
+        private void ToggleButton_Unchecked(object sender, RoutedEventArgs e)
+        {
+            AppLinksPanel.Visibility = Visibility.Collapsed;
+        }
+
         // Импорт необходимых функций Win32
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
 
     }
 }
