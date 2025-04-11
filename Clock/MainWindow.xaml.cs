@@ -1,7 +1,9 @@
-﻿using System;
+﻿using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Media;
 using System.Windows.Threading;
 using Microsoft.Win32;
 
@@ -53,14 +55,14 @@ namespace Clock
             }
         }
 
-        private void Window_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        private void Window_ContextMenuOpening(object sender, System.Windows.Controls.ContextMenuEventArgs e)
         {
             MenuItem pinMenuItem = (MenuItem)contextMenu.Items[0];
             MenuItem unpinMenuItem = (MenuItem)contextMenu.Items[1];
 
             pinMenuItem.IsEnabled = !isPinned;
             unpinMenuItem.IsEnabled = isPinned;
-            topMostMenuItem.IsEnabled = !isTopMost; 
+            topMostMenuItem.IsEnabled = !isTopMost;
             belowMenuItem.IsEnabled = isTopMost;
         }
 
@@ -118,12 +120,12 @@ namespace Clock
             HourLabel.FontSize = 144;
             MinuteLabel.FontSize = 144;
             SecondLabel.FontSize = 144;
-            DateLabel.FontSize = 48; 
+            DateLabel.FontSize = 48;
         }
 
         private void AddToStartup()
         {
-            string appName = "DigitalClock"; 
+            string appName = "DigitalClock";
             string appPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
 
             using (RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
@@ -131,5 +133,84 @@ namespace Clock
                 key.SetValue(appName, "\"" + appPath + "\"");
             }
         }
+        public class AppInfo
+        {
+            public string Name { get; set; }
+            public string Url { get; set; }
+        }
+
+        // Используйте ObservableCollection для автоматического обновления интерфейса
+        public ObservableCollection<AppInfo> Apps { get; set; } = new ObservableCollection<AppInfo>();
+        private void AddAppMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            // Запрос URL приложения
+            string appUrl = Microsoft.VisualBasic.Interaction.InputBox("Введите URL приложения:", "Добавить приложение");
+
+            if (!string.IsNullOrEmpty(appUrl))
+            {
+                // Извлечение имени приложения из URL
+                string appName = System.IO.Path.GetFileNameWithoutExtension(appUrl);
+                appName = char.ToUpper(appName[0]) + appName.Substring(1); // Делаем первую букву заглавной
+
+                // Добавляем приложение в коллекцию
+                Apps.Add(new AppInfo { Name = appName, Url = appUrl });
+                AppButtonsPanel.ItemsSource = Apps; // Установка источника данных
+                AppLinksLabel.Visibility = Apps.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            }
+        }
+        private void AppButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            if (button != null)
+            {
+                AppInfo appInfo = button.DataContext as AppInfo;
+                if (appInfo != null)
+                {
+                    var processName = System.IO.Path.GetFileNameWithoutExtension(appInfo.Url);
+                    var runningProcesses = System.Diagnostics.Process.GetProcessesByName(processName);
+                    if (runningProcesses.Length > 0)
+                    {
+                        // Если приложение уже запущено, активируем его
+                        foreach (var process in runningProcesses)
+                        {
+                            if (process.MainWindowHandle != IntPtr.Zero)
+                            {
+                                // Попробуем восстановить окно, если оно минимизировано
+                                ShowWindow(process.MainWindowHandle, 9); // SW_RESTORE
+                                ShowWindow(process.MainWindowHandle, 3);
+                                SetForegroundWindow(process.MainWindowHandle);
+                                return; // Завершаем метод после активации
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Проверяем, существует ли приложение
+                        if (System.IO.File.Exists(appInfo.Url))
+                        {
+                            try
+                            {
+                                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(appInfo.Url) { UseShellExecute = true });
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show($"Ошибка при запуске приложения: {ex.Message}");
+                            }
+                        }
+                        else
+                        {
+                            MessageBox.Show("Указанный путь к приложению не существует.");
+                        }
+                    }
+                }
+            }
+        }
+        // Импорт необходимых функций Win32
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
     }
 }
