@@ -5,8 +5,9 @@
         Title="Digital Clock" Height="900" Width="1200" Background="Transparent" AllowsTransparency="True" WindowStyle="None" MouseDown="Window_MouseDown" ContextMenuOpening="Window_ContextMenuOpening" MouseMove="Window_MouseMove">
     <Window.Resources>
         <local:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+        <local:IconToImageConverter x:Key="IconToImageConverter"/>
     </Window.Resources>
-        
+
     <Window.ContextMenu>
         <ContextMenu x:Name="contextMenu">
             <MenuItem Header="Закрепить" Click="PinMenuItem_Click"/>
@@ -21,9 +22,12 @@
                     <Slider x:Name="OpacitySlider" Minimum="0" Maximum="100" Value="100" ValueChanged="OpacitySlider_ValueChanged" Width="150"/>
                 </MenuItem>
             </MenuItem>
-            <MenuItem Header="Размер шрифта">
-                <MenuItem>
+            <MenuItem Header="Размер">
+                <MenuItem Header="Шрифт">
                     <Slider x:Name="FontSizeSlider" Minimum="24" Maximum="144" Value="48" ValueChanged="FontSizeSlider_ValueChanged" Width="150"/>
+                </MenuItem>
+                <MenuItem Header="Размер виджета">
+                    <Slider x:Name="FormSizeSlider" Minimum="300" Maximum="1200" Value="800" ValueChanged="FormSizeSlider_ValueChanged" Width="150"/>
                 </MenuItem>
             </MenuItem>
             <MenuItem Header="Сбросить все" Click="ResetAll_Click"/>
@@ -57,9 +61,9 @@
         </StackPanel>
 
         <StackPanel x:Name="TooglePanel" HorizontalAlignment="Center" Grid.Row="2" Margin="10"  Visibility="Collapsed">
-            <Border Background="Black" CornerRadius="15" >
+            <Border Background="Black" CornerRadius="15" Padding="3" >
                 <ToggleButton x:Name="ToggleButton" Content="Ваши приложения" 
-                      Width="300" Height="50" 
+                      Width="300" Height="50" MaxHeight="50" MaxWidth="300"
                       Background="Black" Foreground="White" 
                       BorderBrush="Black"
                       FontSize="16" FontWeight="Bold"
@@ -100,38 +104,33 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel>
-                            <Button Width="100" Height="100" Margin="5" BorderThickness="0" Click="AppButton_Click">
-                                <Button.Style>
-                                    <Style TargetType="Button">
-                                        <Setter Property="Background" Value="#FF000000"/>
-                                        <Setter Property="Foreground" Value="White"/>
-                                        <Setter Property="BorderThickness" Value="0"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border Background="{TemplateBinding Background}" CornerRadius="90">
-                                                        <Grid>
-                                                            <TextBlock Text="{Binding Name}" 
-                                                               HorizontalAlignment="Center" 
-                                                               VerticalAlignment="Center" 
-                                                               FontSize="16"
-                                                               TextTrimming="CharacterEllipsis" 
-                                                               MaxWidth="100"/>
-                                                        </Grid>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#FF1A1A1A"/>
-                                            </Trigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
-                        </StackPanel>
+                        <Button Width="100" Height="100" Margin="5" BorderThickness="0" Click="AppButton_Click">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <!-- Устанавливаем фон на прозрачный -->
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="Transparent" CornerRadius="90">
+                                                    <Image Source="{Binding AppIcon, Converter={StaticResource IconToImageConverter}}" 
+                                               Width="60" Height="60" 
+                                               HorizontalAlignment="Center" 
+                                               VerticalAlignment="Center"/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="#FF1A1A1A"/>
+                                            <!-- Фон при наведении -->
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                        </Button>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
