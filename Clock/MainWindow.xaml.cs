@@ -12,9 +12,21 @@ namespace Clock
 {
     public partial class MainWindow : Window
     {
+        #region [Fields and Properties]
+
+
         private DispatcherTimer timer;
         private bool isPinned = false;
         private bool isTopMost = false;
+
+        // Используйте ObservableCollection для автоматического обновления интерфейса
+        public ObservableCollection<AppInfo> Apps { get; set; } = new ObservableCollection<AppInfo>();
+
+        #endregion
+
+
+        #region [Constructor]
+
 
         public MainWindow()
         {
@@ -24,6 +36,13 @@ namespace Clock
             AddToStartup();
         }
 
+
+        #endregion
+
+
+        #region [Main Function]
+
+        //Запуск хода времни
         private void StartClock()
         {
             timer = new DispatcherTimer();
@@ -32,6 +51,7 @@ namespace Clock
             timer.Start();
         }
 
+        //Обновление времени
         private void UpdateClock(object sender, EventArgs e)
         {
             var now = DateTime.Now;
@@ -41,6 +61,59 @@ namespace Clock
             DateLabel.Content = now.ToString("dddd, MMMM dd, yyyy");
         }
 
+        //Сохранение данных об приложениях в файл
+        private void SaveAppData()
+        {
+            var json = JsonConvert.SerializeObject(Apps);
+            System.IO.File.WriteAllText("appData.json", json);
+        }
+
+        //Загрузка данных из конструктора
+        private void LoadAppData()
+        {
+            if (System.IO.File.Exists("appData.json"))
+            {
+                var json = System.IO.File.ReadAllText("appData.json");
+                var appList = JsonConvert.DeserializeObject<ObservableCollection<AppInfo>>(json);
+                if (appList != null)
+                {
+                    Apps = appList;
+                    AppButtonsPanel.ItemsSource = Apps;
+
+                    UpdateAppVisible();
+                }
+            }
+        }
+
+        private void UpdateAppVisible()
+        {
+            if (Apps.Count > 0)
+            {
+                TooglePanel.Visibility = Visibility.Visible;
+                this.ToggleButton.IsChecked = true; // Устанавливаем состояние Checked
+                ToggleButton_Checked(this, new RoutedEventArgs()); // Явно вызываем метод
+            }
+            else
+            {
+                this.ToggleButton.IsChecked = false; // Устанавливаем состояние Unchecked
+                ToggleButton_Unchecked(this, new RoutedEventArgs()); // Явно вызываем метод
+            }
+        }
+        //Автозагрузка приложения
+        private void AddToStartup()
+        {
+            string appName = "DigitalClock";
+            string appPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+
+            using (RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
+            {
+                key.SetValue(appName, "\"" + appPath + "\"");
+            }
+        }
+        #endregion
+
+
+        #region [Event handlers]
         private void Window_MouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed && !isPinned && !isTopMost)
@@ -83,26 +156,7 @@ namespace Clock
             SaveAppData();
             this.Close();
         }
-        private void SaveAppData()
-        {
-            var json = JsonConvert.SerializeObject(Apps);
-            System.IO.File.WriteAllText("appData.json", json);
-        }
-        private void LoadAppData()
-        {
-            if (System.IO.File.Exists("appData.json"))
-            {
-                var json = System.IO.File.ReadAllText("appData.json");
-                var appList = JsonConvert.DeserializeObject<ObservableCollection<AppInfo>>(json);
-                if (appList != null)
-                {
-                    Apps = appList;
-                    AppButtonsPanel.ItemsSource = Apps;
-                    AppLinksLabel.Visibility = Apps.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-                    AppLinksPanel.Visibility = AppLinksLabel.Visibility;
-                }
-            }
-        }
+
         private void TopMostMenuItem_Click(object sender, RoutedEventArgs e)
         {
             isTopMost = true;
@@ -145,24 +199,6 @@ namespace Clock
             DateLabel.FontSize = 48;
         }
 
-        private void AddToStartup()
-        {
-            string appName = "DigitalClock";
-            string appPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
-
-            using (RegistryKey key = Registry.CurrentUser.OpenSubKey("SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", true))
-            {
-                key.SetValue(appName, "\"" + appPath + "\"");
-            }
-        }
-        public class AppInfo
-        {
-            public string Name { get; set; }
-            public string Url { get; set; }
-        }
-
-        // Используйте ObservableCollection для автоматического обновления интерфейса
-        public ObservableCollection<AppInfo> Apps { get; set; } = new ObservableCollection<AppInfo>();
         private void AddAppMenuItem_Click(object sender, RoutedEventArgs e)
         {
             // Запрос URL приложения
@@ -176,11 +212,11 @@ namespace Clock
 
                 // Добавляем приложение в коллекцию
                 Apps.Add(new AppInfo { Name = appName, Url = appUrl });
-                AppButtonsPanel.ItemsSource = Apps; // Установка источника данных
-                AppLinksLabel.Visibility = Apps.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-                AppLinksPanel.Visibility = AppLinksLabel.Visibility;
+                AppButtonsPanel.ItemsSource = Apps; // Установка источника данных                                
+                UpdateAppVisible();
             }
         }
+
         private void AppButton_Click(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
@@ -232,19 +268,31 @@ namespace Clock
         private void ToggleButton_Checked(object sender, RoutedEventArgs e)
         {
             AppLinksPanel.Visibility = Visibility.Visible;
+            this.ToggleButton.Content = "Ваши приложения";
+            this.ToggleButton.Width = 300;
+            this.ToggleButton.Height = 50;
         }
 
         private void ToggleButton_Unchecked(object sender, RoutedEventArgs e)
         {
             AppLinksPanel.Visibility = Visibility.Collapsed;
+            this.ToggleButton.Content = "...";
+            this.ToggleButton.Width = 20;
+            this.ToggleButton.Height = 20;
         }
+        #endregion
 
-        // Импорт необходимых функций Win32
+
+        #region [Win32 required functions]
+
+
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool SetForegroundWindow(IntPtr hWnd);
 
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+        #endregion
 
 
     }

@@ -56,10 +56,10 @@
             </Border>
         </StackPanel>
 
-        <StackPanel HorizontalAlignment="Center" Grid.Row="2" Margin="10">
-            <Border Background="Black" CornerRadius="15" Padding="20">
-                <ToggleButton x:Name="ToggleButton" Content="Скрыть/Показать приложения" 
-                      Width="200" Height="30" Margin="5" 
+        <StackPanel x:Name="TooglePanel" HorizontalAlignment="Center" Grid.Row="2" Margin="10"  Visibility="Collapsed">
+            <Border Background="Black" CornerRadius="15" >
+                <ToggleButton x:Name="ToggleButton" Content="Ваши приложения" 
+                      Width="300" Height="50" 
                       Background="Black" Foreground="White" 
                       BorderBrush="Black"
                       FontSize="16" FontWeight="Bold"
@@ -89,11 +89,8 @@
                 </ToggleButton>
             </Border>
         </StackPanel>
-
-        <StackPanel x:Name="AppLinksPanel" HorizontalAlignment="Center" Grid.Row="3" Margin="10" Visibility="Visible">
-            <Border Background="Black" CornerRadius="15" Padding="20" Visibility="{Binding ElementName=ToggleButton, Path=IsChecked, Converter={StaticResource BooleanToVisibilityConverter}}">
-                <TextBlock x:Name="AppLinksLabel" FontSize="24" Foreground="White" Text="Ваши приложения:" Visibility="Visible"/>
-            </Border>
+        <StackPanel x:Name="AppLinksPanel" HorizontalAlignment="Center" Grid.Row="3" Margin="10"
+            Visibility="{Binding IsVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
 
             <ItemsControl x:Name="AppButtonsPanel" ItemsSource="{Binding Apps}">
                 <ItemsControl.ItemsPanel>
