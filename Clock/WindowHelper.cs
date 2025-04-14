@@ -98,6 +98,7 @@ public class WindowHelper
     {
         return !string.IsNullOrWhiteSpace(windowTitle) &&
                !windowTitle.Contains("Microsoft Text Input Application") &&
-               !windowTitle.ToLower().Contains("параметры");
+               !windowTitle.ToLower().Contains("параметры") &&
+               !windowTitle.ToLower().Contains("калькулятор");
     }
 }
