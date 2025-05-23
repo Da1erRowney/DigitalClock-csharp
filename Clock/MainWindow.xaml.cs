@@ -1,15 +1,12 @@
-﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
+﻿using Microsoft.Win32;
+using Newtonsoft.Json;
+using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using Microsoft.Win32;
-using System.Drawing;
-using Newtonsoft.Json;
-using Microsoft.UI.Xaml.Controls;
 
 namespace Clock
 {
@@ -21,6 +18,15 @@ namespace Clock
         private DispatcherTimer timer;
         private bool isPinned = false;
         private bool isTopMost = false;
+        private List<Alarm> alarms = new List<Alarm>
+        {
+            new Alarm { Time = new TimeSpan(10, 0, 0), IsActive =true  },
+            new Alarm { Time = new TimeSpan(11, 0, 0), IsActive =true  },
+            new Alarm { Time = new TimeSpan(12, 30, 0), IsActive =true  },
+            new Alarm { Time = new TimeSpan(15, 0, 0), IsActive =true  },
+            new Alarm { Time = new TimeSpan(16, 0, 0), IsActive =true  },
+            new Alarm { Time = new TimeSpan(17, 15, 0), IsActive =true  },
+        };
 
         // Используйте ObservableCollection для автоматического обновления интерфейса
         public ObservableCollection<AppInfo> Apps { get; set; } = new ObservableCollection<AppInfo>();
@@ -62,7 +68,55 @@ namespace Clock
             MinuteLabel.Content = now.ToString("mm");
             SecondLabel.Content = now.ToString("ss");
             DateLabel.Content = now.ToString("dddd, MMMM dd, yyyy");
+
+            foreach (var alarm in alarms)
+            {
+                if (alarm.IsActive && alarm.Time.Hours == now.Hour && alarm.Time.Minutes == now.Minute && alarm.Time.Seconds == now.Second)
+                {
+                    // Change the color to indicate an active alarm
+                    HourLabel.Foreground = new SolidColorBrush(Colors.Red);
+                    HourBorder.Background = new SolidColorBrush(Colors.White);
+
+                    MinuteLabel.Foreground = new SolidColorBrush(Colors.Red);
+                    MinuteBorder.Background = new SolidColorBrush(Colors.White);
+
+                    SecondLabel.Foreground = new SolidColorBrush(Colors.Red);
+                    SecondBorder.Background = new SolidColorBrush(Colors.White);
+
+                    DateBorder.Background = new SolidColorBrush(Colors.White);
+                    DateLabel.Foreground = new SolidColorBrush(Colors.Red);
+
+                    ToggleBorder.Background = new SolidColorBrush(Colors.White);
+                    ToggleButton.Foreground = new SolidColorBrush(Colors.Red);
+                    ToggleButton.Background = new SolidColorBrush(Colors.White);
+                    alarm.IsActive = false;
+                    break;
+                }
+            }
+
             LoadAppData();
+        }
+        private void Clock_Click(object sender, MouseButtonEventArgs e)
+        {
+            foreach (var alarm in alarms)
+            {
+                alarm.IsActive = true; // Disable the alarm
+            }
+            HourLabel.Foreground = new SolidColorBrush(Colors.White); // Reset color
+            HourBorder.Background = new SolidColorBrush(Colors.Black);
+
+            MinuteLabel.Foreground = new SolidColorBrush(Colors.White);
+            MinuteBorder.Background = new SolidColorBrush(Colors.Black);
+
+            SecondLabel.Foreground = new SolidColorBrush(Colors.White);
+            SecondBorder.Background = new SolidColorBrush(Colors.Black);
+
+            DateBorder.Background = new SolidColorBrush(Colors.Black);
+            DateLabel.Foreground = new SolidColorBrush(Colors.White);
+
+            ToggleBorder.Background = new SolidColorBrush(Colors.Black);
+            ToggleButton.Background = new SolidColorBrush(Colors.Black);
+            ToggleButton.Foreground = new SolidColorBrush(Colors.White);
         }
 
         //Сохранение данных об приложениях в файл

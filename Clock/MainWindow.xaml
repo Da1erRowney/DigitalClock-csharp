@@ -41,27 +41,27 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
-            <Border Background="Black" CornerRadius="15" Padding="20" Margin="5">
-                <Label x:Name="HourLabel" FontSize="144" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
-            </Border>
-            <Border Background="Black" CornerRadius="15" Padding="20" Margin="5">
-                <Label x:Name="MinuteLabel" FontSize="144" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
-            </Border>
-            <Border Background="Black" CornerRadius="15" Padding="20" Margin="5">
-                <Label x:Name="SecondLabel" FontSize="144" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
-            </Border>
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10" MouseDown="Clock_Click">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="10">
+                <Border Background="Black" CornerRadius="15" Padding="20" Margin="5" x:Name="HourBorder">
+                    <Label x:Name="HourLabel" FontSize="144" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                </Border>
+                <Border Background="Black" CornerRadius="15" Padding="20" Margin="5"  x:Name="MinuteBorder">
+                    <Label x:Name="MinuteLabel" FontSize="144" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                </Border>
+                <Border Background="Black" CornerRadius="15" Padding="20" Margin="5"  x:Name="SecondBorder">
+                    <Label x:Name="SecondLabel" FontSize="144" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
+                </Border>
+            </StackPanel>
         </StackPanel>
-
         <StackPanel HorizontalAlignment="Center" Grid.Row="1" Margin="10">
-            <Border Background="Black" CornerRadius="15" Padding="20">
+            <Border Background="Black" CornerRadius="15" Padding="20" x:Name="DateBorder">
                 <Label x:Name="DateLabel" FontSize="48" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="White"/>
             </Border>
         </StackPanel>
 
         <StackPanel x:Name="TooglePanel" HorizontalAlignment="Center" Grid.Row="2" Margin="10"  Visibility="Collapsed">
-            <Border Background="Black" CornerRadius="15" Padding="3" >
+            <Border Background="Black" CornerRadius="15" Padding="3" x:Name="ToggleBorder">
                 <ToggleButton x:Name="ToggleButton" Content="Ваши приложения" 
                       Width="300" Height="50" MaxHeight="50" MaxWidth="300"
                       Background="Black" Foreground="White" 
